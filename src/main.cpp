@@ -50,6 +50,12 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
+// 模型状态
+glm::vec3 modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 modelRotation = glm::vec3(0.0f, 0.0f, 0.0f); 
+glm::vec3 modelScale    = glm::vec3(1.0f, 1.0f, 1.0f);
+
+
 // 帧时间
 float deltaTime = 0.0f;	// 这一帧与上一帧的时间差
 float lastFrame = 0.0f; // 上一帧的时间
@@ -185,7 +191,15 @@ int main()
 
         // 模型矩阵
         glm::mat4 model = glm::mat4(1.0f);
-        //model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        
+        // 平移
+        model = glm::translate(model, modelPosition);
+        // 旋转
+        model = glm::rotate(model, glm::radians(modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(modelRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+        // 缩放
+        model = glm::scale(model, modelScale);
         ourShader.setMat4("model", model);
 
         // 绘制
@@ -193,7 +207,7 @@ int main()
 
         //ImGui相关内容更新
         {
-            // 创建一个新窗口
+            // 相机信息窗口
             ImGui::Begin("Camera Info");
 
             // 显示当前模式
@@ -216,7 +230,7 @@ int main()
             ImGui::End();
         }
         {
-            // 创建一个新窗口
+            // 光源信息窗口
             ImGui::Begin("Light Info");
 
             // 显示当前模式
@@ -235,6 +249,23 @@ int main()
             ImGui::ColorEdit3("Light Color", glm::value_ptr(lightColor));
             
             // 结束窗口
+            ImGui::End();
+        }
+        {   //模型位置窗口
+            ImGui::Begin("Model Transform");
+
+            ImGui::DragFloat3("Position", glm::value_ptr(modelPosition), 0.1f);
+            ImGui::DragFloat3("Rotation", glm::value_ptr(modelRotation), 1.0f);
+            ImGui::DragFloat3("Scale", glm::value_ptr(modelScale), 0.01f);
+            
+            // 重置按钮
+            if (ImGui::Button("Reset Transform"))
+            {
+                modelPosition = glm::vec3(0.0f);
+                modelRotation = glm::vec3(0.0f);
+                modelScale    = glm::vec3(1.0f);
+            }
+
             ImGui::End();
         }
         // ImGui 渲染
